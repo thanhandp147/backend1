@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const { hash, compare } = require('bcrypt');
+// const { hash, compare } = require('bcrypt');
 const { USER_MODEL } = require('../models/user.model');
 const { POST_MODEL } = require('../models/post.model')
 const validateRegisterInput = require('../validation/register.validate');
-const bcrypt = require('bcrypt');
+const validateLoginInput= require('../validation/login.validate');
+// const bcrypt = require('bcrypt');
 
 
 router.route('/register')
@@ -13,58 +14,106 @@ router.route('/register')
         res.render('demodangki')
     })
     .post(async (req, res) => {
-        //Check validation
-        const { errors, isValid } = validateRegisterInput(req.body);
-
-        const { username, password, fullname, email } = req.body;
-        await USER_MODEL.findOne({ username }).then(user => {
+        const data = req.body;
+        
+        
+        const { errors, isValid } = validateRegisterInput(data);
+        // console.log(errors);
+        
+        const { username, password, fullname, email } = data;
+        
+        await USER_MODEL.findOne( {username} ).then(user => {
             if (user) {
-                console.log(user);
-                errors.unshift("Username is Exist")
+                // errors.exist= "Username is Exist";
+                errors.unshift("Username is Exist");
             }
         })
-        if (!isValid) {
 
-             res.send(errors);
-
+        if(errors.length>0){
+            res.status(200).send(errors);
         }
-        if (isValid) {
-            
-            res.send(errors)
+        else{
             const newUser = new USER_MODEL({
                 username,
                 email,
                 fullname,
                 password
             })
-            // Hash password before saving in database
-            bcrypt.genSalt(10, (err, salt) => {
-                bcrypt.hash(newUser.password, salt, async (err, hash) => {
-                    if (err) throw err;
-                    newUser.password = hash;
-                    await newUser
-                    .save()
-                    .then(()=> console.log('Done'))
-                    .catch(err => console.log(err));
-                })
-            })
+            await newUser
+            .save()
+            .then(()=> console.log('Done'))
+            .catch(err => console.log(err));
+            res.status(201).send()
         }
         
-    })
         
+
+        
+        //Check validation
+        // const { errors, isValid } = validateRegisterInput(req.body);
+
+        // const { username, password, fullname, email } = req.body;
+        // await USER_MODEL.findOne({ username }).then(user => {
+        //     if (user) {
+        //         console.log(user);
+        //         errors.unshift("Username is Exist")
+        //     }
+        // })
+        // if (!isValid) {
+
+        //      res.send(errors);
+
+        // }
+        // if (isValid) {
+
+        //     res.send(errors)
+            // const newUser = new USER_MODEL({
+            //     username,
+            //     email,
+            //     fullname,
+            //     password
+            // })
+        //     // Hash password before saving in database
+        //     bcrypt.genSalt(10, (err, salt) => {
+        //         bcrypt.hash(newUser.password, salt, async (err, hash) => {
+        //             if (err) throw err;
+        //             newUser.password = hash;
+                    // await newUser
+                    // .save()
+                    // .then(()=> console.log('Done'))
+                    // .catch(err => console.log(err));
+        //         })
+        //     })
+        // }
+
+    })
+
 
 router.route('/login')
     .post(async (req, res) => {
-        const { usernameLogin: username, passwordLogin: password } = req.body;
+        const data= req.body;
+        const { errors, isValid } = validateLoginInput(data);
+        const { usernameLogin: username, passwordLogin: password } = data;
         console.log(username, password);
-        
+        if(errors.length>0){
+            res.status(203).send(errors);
+        }
+
         let isExistUser = await USER_MODEL.findOne({ username });
-        if (!isExistUser) return res.send('Sai tên đăng nhập');
+        
+        if (!isExistUser){
+            errors.push('Sai tên đăng nhập');
+            return res.status(200).send(errors);
+        }
         const { password: hashPwd } = isExistUser;
-        let isMatch = await compare(password, hashPwd);
-        if (!isMatch) return res.send('Sai mật khẩu, vui lòng nhập lại');
-        req.session.infoUser = isExistUser;
-        res.send({redirect: '/'});
+        let isMatch = password==hashPwd;
+
+        if (!isMatch){
+            errors.push('Sai mật khẩu, vui lòng nhập lại');
+            return res.status(201).send(errors);
+        }
+        res.status(202).send();
+        
     })
 
 router.get('/', async (req, res) => {

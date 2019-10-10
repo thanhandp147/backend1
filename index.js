@@ -4,6 +4,7 @@ const bodyParser= require('body-parser');
 const mongoose= require('mongoose');
 const PORT= 3000;
 const expressSession= require('express-session');
+var cors = require('cors');
 /**
  * Import Internal
  */
@@ -11,6 +12,8 @@ const expressSession= require('express-session');
 server.set('view engine', 'ejs');
 server.set('views', './views');
 server.use( express.static('./public/'))
+
+server.use(cors());
 
 
 /**
