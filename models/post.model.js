@@ -7,10 +7,8 @@ let postSchema= new Schema({
         ref: 'user'
     },
     content: { type: String}
-
+    
 })
-
-
 
 let Post = mongoose.model('post', postSchema);
 exports.POST_MODEL = Post;

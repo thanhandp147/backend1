@@ -1,11 +1,16 @@
 let mongoose = require('mongoose');
 let Schema   = mongoose.Schema;
 
+
 let userSchema = new Schema({
     username: { type: String, trim: true, unique: true, required: true },
     password: { type: String },
     fullname: String,
     email: String,
+    comfirmed: { type: Boolean, default: false },
+    birthday: {type: String},
+    phone: {type: String},
+    avatar:{ type: String},
     /**
      * list người dùng đã gửi kết bạn cho mình
      */

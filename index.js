@@ -5,6 +5,7 @@ const mongoose= require('mongoose');
 const PORT= 3000;
 const expressSession= require('express-session');
 var cors = require('cors');
+
 /**
  * Import Internal
  */
@@ -35,6 +36,10 @@ const { USER_ROUTER }= require('./controllers/user.router');
 server.use('/', USER_ROUTER);
 const { POST_ROUTER }= require('./controllers/post.route');
 server.use('/post', POST_ROUTER );
+
+
+
+
 
 /**Set default Route */
 server.get('/', (req, res) => res.json({ message: 'Hello Word!' }))
